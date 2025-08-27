@@ -1,23 +1,23 @@
-import { 
-  companies, 
-  jobs, 
-  jobApplications, 
-  blogPosts, 
+import {
+  companies,
+  jobs,
+  jobApplications,
+  blogPosts,
   contactMessages,
-  type Company, 
+  type Company,
   type InsertCompany,
-  type Job, 
+  type Job,
   type InsertJob,
-  type JobApplication, 
+  type JobApplication,
   type InsertJobApplication,
-  type BlogPost, 
+  type BlogPost,
   type InsertBlogPost,
-  type ContactMessage, 
+  type ContactMessage,
   type InsertContactMessage,
   type JobWithCompany,
   type User,
   type InsertUser,
-  users
+  users,
 } from "@shared/schema";
 import { supabase } from "./db";
 import { eq, desc, and, ilike, gte, lte, sql } from "drizzle-orm";
@@ -51,7 +51,9 @@ export interface IStorage {
   // Job application methods
   getJobApplications(jobId?: string): Promise<JobApplication[]>;
   getJobApplication(id: string): Promise<JobApplication | undefined>;
-  createJobApplication(application: InsertJobApplication): Promise<JobApplication>;
+  createJobApplication(
+    application: InsertJobApplication
+  ): Promise<JobApplication>;
 
   // Blog methods
   getBlogPosts(limit?: number, offset?: number): Promise<BlogPost[]>;
@@ -182,7 +184,10 @@ export class DatabaseStorage {
       query = query.limit(filters.limit);
     }
     if (filters?.offset) {
-      query = query.offset(filters.offset);
+      query = query.range(
+        filters.offset,
+        filters.offset + (filters.limit ? filters.limit - 1 : 9) // default limit=10
+      );
     }
 
     const { data, error } = await query.order("postedAt", { ascending: false });
@@ -239,7 +244,9 @@ export class DatabaseStorage {
   async getJobApplications(jobId?: string): Promise<JobApplication[]> {
     let query = supabase.from("jobApplications").select("*");
     if (jobId) query = query.eq("jobId", jobId);
-    const { data, error } = await query.order("appliedAt", { ascending: false });
+    const { data, error } = await query.order("appliedAt", {
+      ascending: false,
+    });
     if (error) {
       console.error("getJobApplications error:", error);
       return [];
@@ -260,7 +267,9 @@ export class DatabaseStorage {
     return data;
   }
 
-  async createJobApplication(application: InsertJobApplication): Promise<JobApplication | undefined> {
+  async createJobApplication(
+    application: InsertJobApplication
+  ): Promise<JobApplication | undefined> {
     const { data, error } = await supabase
       .from("jobApplications")
       .insert([application])
@@ -280,8 +289,8 @@ export class DatabaseStorage {
       .select("*")
       .eq("isPublished", true)
       .order("publishedAt", { ascending: false })
-      .limit(limit)
-      .offset(offset);
+      .range(offset, offset + limit - 1); // 👈 replaces .limit().offset()
+
     if (error) {
       console.error("getBlogPosts error:", error);
       return [];
@@ -317,7 +326,9 @@ export class DatabaseStorage {
     return data;
   }
 
-  async createBlogPost(blogPost: InsertBlogPost): Promise<BlogPost | undefined> {
+  async createBlogPost(
+    blogPost: InsertBlogPost
+  ): Promise<BlogPost | undefined> {
     const { data, error } = await supabase
       .from("blogPosts")
       .insert([blogPost])
@@ -343,7 +354,9 @@ export class DatabaseStorage {
     return data || [];
   }
 
-  async createContactMessage(message: InsertContactMessage): Promise<ContactMessage | undefined> {
+  async createContactMessage(
+    message: InsertContactMessage
+  ): Promise<ContactMessage | undefined> {
     const { data, error } = await supabase
       .from("contactMessages")
       .insert([message])
