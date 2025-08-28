@@ -2,6 +2,7 @@ import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { createClient } from "@supabase/supabase-js";
 import { registerRoutes } from "./routes.js";
+import cors from "cors";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL!;
@@ -11,6 +12,16 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+
+
+app.use(cors({
+  origin: [
+    "http://localhost:5173",  // local dev
+    "https://hire-job-fast.netlify.app" // production
+  ],
+  credentials: true, // if you use cookies or `credentials: "include"`
+}));
 
 // Middleware: API logging
 app.use((req, res, next) => {
