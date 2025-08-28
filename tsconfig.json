@@ -7,7 +7,7 @@
     "moduleResolution": "NodeNext",
     "module": "NodeNext",
     "target": "ESNext",
-    "types": ["node", "vite/client"],
+    "types": ["node"],
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,
