@@ -4,7 +4,7 @@ import { supabase } from "./index.js";
 import {
   insertJobApplicationSchema,
   insertContactMessageSchema,
-} from "@shared/schema.js";
+} from "../shared/schema.js";
 import multer, { FileFilterCallback } from "multer";
 import path from "path";
 import fs from "fs";
