@@ -1,4 +1,4 @@
-import type { Express, Request } from "express";
+import type { Express, Request,NextFunction  } from "express";
 import { createServer, type Server } from "http";
 import { supabase } from "./index.js";
 import {
@@ -57,6 +57,7 @@ async function uploadFileToSupabase(file: Express.Multer.File) {
 
 // Register all routes
 export async function registerRoutes(app: Express): Promise<Server> {
+
   // ----- Jobs -----
   app.get("/api/jobs", async (req, res) => {
     try {
