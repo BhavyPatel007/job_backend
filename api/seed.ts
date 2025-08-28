@@ -1,5 +1,4 @@
-import { supabase as db } from "./db";
-import { companies, jobs, blogPosts } from "@shared/schema";
+import { supabase as db } from "./db.js";
 
 async function seed() {
   try {

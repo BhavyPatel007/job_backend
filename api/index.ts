@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { createClient } from "@supabase/supabase-js";
-import { registerRoutes } from "./routes";
+import { registerRoutes } from "./routes.js";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL!;

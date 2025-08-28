@@ -1,7 +1,10 @@
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
-import { supabase } from ".";
-import { insertJobApplicationSchema, insertContactMessageSchema } from "@shared/schema";
+import { supabase } from "./index.js";
+import {
+  insertJobApplicationSchema,
+  insertContactMessageSchema,
+} from "@shared/schema.js";
 import multer, { FileFilterCallback } from "multer";
 import path from "path";
 import fs from "fs";
@@ -13,7 +16,11 @@ if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 const upload = multer({
   dest: uploadDir,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
-  fileFilter: (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+  fileFilter: (
+    req: Request,
+    file: Express.Multer.File,
+    cb: FileFilterCallback
+  ) => {
     const allowedTypes = [
       "application/pdf",
       "application/msword",
@@ -23,7 +30,12 @@ const upload = multer({
       "image/jpg",
     ];
     if (allowedTypes.includes(file.mimetype)) cb(null, true);
-    else cb(new Error("Invalid file type. Only PDF, DOC, DOCX, and images are allowed."));
+    else
+      cb(
+        new Error(
+          "Invalid file type. Only PDF, DOC, DOCX, and images are allowed."
+        )
+      );
   },
 });
 
@@ -32,7 +44,9 @@ async function uploadFileToSupabase(file: Express.Multer.File) {
   const fileData = fs.readFileSync(file.path);
   const filePath = `uploads/${Date.now()}_${file.originalname}`;
 
-  const { error } = await supabase.storage.from("uploads").upload(filePath, fileData);
+  const { error } = await supabase.storage
+    .from("uploads")
+    .upload(filePath, fileData);
   if (error) throw error;
 
   fs.unlinkSync(file.path); // remove local temp file
@@ -73,7 +87,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select("*")
         .eq("id", req.params.id)
         .single();
-      if (error || !data) return res.status(404).json({ error: "Job not found" });
+      if (error || !data)
+        return res.status(404).json({ error: "Job not found" });
       res.json(data);
     } catch (err) {
       console.error(err);
@@ -99,12 +114,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .select("*")
           .eq("id", jobId)
           .single();
-        if (jobError || !job) return res.status(404).json({ error: "Job not found" });
+        if (jobError || !job)
+          return res.status(404).json({ error: "Job not found" });
 
-        const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+        const files = req.files as
+          | { [fieldname: string]: Express.Multer.File[] }
+          | undefined;
 
-        const resumeUrl = files?.resume?.[0] ? await uploadFileToSupabase(files.resume[0]) : undefined;
-        const coverLetterUrl = files?.coverLetter?.[0] ? await uploadFileToSupabase(files.coverLetter[0]) : undefined;
+        const resumeUrl = files?.resume?.[0]
+          ? await uploadFileToSupabase(files.resume[0])
+          : undefined;
+        const coverLetterUrl = files?.coverLetter?.[0]
+          ? await uploadFileToSupabase(files.coverLetter[0])
+          : undefined;
         const additionalFiles = [];
 
         if (files?.additionalFiles) {
@@ -141,7 +163,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ----- Blog -----
   app.get("/api/blog", async (_req, res) => {
     try {
-      const { data, error } = await supabase.from("blog_posts").select("*").limit(20);
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .limit(20);
       if (error) throw error;
       res.json(data);
     } catch (err) {
@@ -157,7 +182,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select("*")
         .eq("slug", req.params.slug)
         .single();
-      if (error || !data) return res.status(404).json({ error: "Blog post not found" });
+      if (error || !data)
+        return res.status(404).json({ error: "Blog post not found" });
       res.json(data);
     } catch (err) {
       console.error(err);
@@ -181,7 +207,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/contact", async (req, res) => {
     try {
       const validatedData = insertContactMessageSchema.parse(req.body);
-      const { data, error } = await supabase.from("contact_messages").insert([validatedData]).select().single();
+      const { data, error } = await supabase
+        .from("contact_messages")
+        .insert([validatedData])
+        .select()
+        .single();
       if (error) throw error;
       res.status(201).json(data);
     } catch (err) {

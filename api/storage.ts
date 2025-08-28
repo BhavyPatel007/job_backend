@@ -18,9 +18,8 @@ import {
   type User,
   type InsertUser,
   users,
-} from "@shared/schema";
-import { supabase } from "./db";
-import { eq, desc, and, ilike, gte, lte, sql } from "drizzle-orm";
+} from "@shared/schema.js";
+import { supabase } from "./db.js";
 
 export interface IStorage {
   // User methods
